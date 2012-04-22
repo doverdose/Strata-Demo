@@ -1,0 +1,9 @@
+04-20 18:57:08 jdbc[2]: exception
+org.h2.jdbc.JdbcSQLException: Table "APPLICATION" already exists; SQL statement:
+create table Application (
+    Name varchar(128) not null,
+    CreatedDate date not null,
+    URL varchar(128),
+    ApplicationRoot varchar(128),
+    ID bigint not null primary key auto_increment
+  ) [42101-166]

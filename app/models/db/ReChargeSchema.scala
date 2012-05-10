@@ -4,7 +4,6 @@ package models.db
 import org.squeryl._
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.Schema
-import models.db.enum._
 import models.db.entity._
 import models.db.relation._
 
@@ -16,19 +15,15 @@ object ReChargeSchema extends Schema {
   val applicationVersions = table[ApplicationVersion]
   val conditions = table[Condition]
   val notifications = table[Notification]
-  val notificationTypes = table[NotificationType]
-  val relationshipTypes = table[RelationshipType]
-  val roleTypes = table[RoleType]
   val sessions = table[models.db.entity.Session]
   val sessionApplicationPages = table[SessionApplicationPage]("Session_ApplicationPage")
   val taskDefinitions = table[TaskDefinition]
   val taskExecutions = table[TaskExecution]
   val taskExecutionResults = table[TaskExecutionResult]
-  val taskTypes = table[TaskType]
   val users = table[User]
   val userConditions = table[UserCondition]("User_Condition")
   val userRelationships = table[UserRelationship]
-  val userWorkflows = table[UserWorkflow]("User_Workflow")
+  val userWorkflowDefinitions = table[UserWorkflow]("User_Workflow")
   val workflowDefinitions = table[WorkflowDefinition]
   val workflowExecutions = table[WorkflowExecution]
   val workflowDefinitionTaskDefinitions = table[WorkflowDefinitionTaskDefinition]("WorkflowDefinition_TaskDefinition")
@@ -48,15 +43,6 @@ object ReChargeSchema extends Schema {
   on (notifications) (notification => declare(
     notification.id is(primaryKey,autoIncremented)
   ))
-  on (notificationTypes) (notificationType => declare(
-    notificationType.id is(primaryKey)
-  ))
-  on (relationshipTypes) (relationshipType => declare(
-    relationshipType.id is(primaryKey)
-  ))
-  on (roleTypes) (roleType => declare(
-    roleType.id is(primaryKey)
-  ))
   on (sessions) (session => declare(
     session.id is(primaryKey,autoIncremented)
   ))
@@ -71,9 +57,6 @@ object ReChargeSchema extends Schema {
   on (taskExecutionResults) (taskExecutionResult => declare(
     taskExecutionResult.id is(primaryKey,autoIncremented)
   ))
-  on (taskTypes) (taskType => declare(
-    taskType.id is(primaryKey)
-  ))
   on (users) (user => declare(
     user.id is(primaryKey,autoIncremented)
   ))
@@ -82,7 +65,7 @@ object ReChargeSchema extends Schema {
   ))
   on (userRelationships) (userRelationship => declare(
   ))
-  on (userWorkflows) (userWorkflow => declare(
+  on (userWorkflowDefinitions) (userWorkflow => declare(
     userWorkflow.id is(primaryKey,autoIncremented)
   ))
   on (workflowDefinitions) (workflowDefinition => declare(

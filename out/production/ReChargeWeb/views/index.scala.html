@@ -1,7 +1,23 @@
-@(message: String)
+@(signInForm: Form[(String,String)])
 
-@main("Welcome to Play 2.0") {
-    
-    @play20.welcome(message)
-    
+@import helper._
+
+@main("ReCharge") {
+
+        @form(action = routes.Application.signIn, args = 'id -> "signInForm") {
+
+            @inputText(
+                signInForm("email"), '_label -> "Email",
+                '_help -> "Enter a valid email address."
+            )
+
+            @inputPassword(
+                signInForm("password"),
+                '_label -> "Password",
+                '_help -> "A password must be at least 6 characters. "
+            )
+        <p class="buttons">
+            <input type="submit" id="submit" value="Log In">
+        <p>
+        }
 }

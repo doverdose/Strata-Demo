@@ -4,64 +4,97 @@ import entity._
 import org.squeryl._
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.adapters.H2Adapter
+import org.squeryl.adapters.MySQLAdapter
 import org.squeryl.Session
 import org.squeryl.SessionFactory
 import java.sql.Date
 import relation.{UserWorkflow, WorkflowDefinitionTaskDefinition}
+import java.io.{FileWriter, PrintWriter}
+import java.util.Calendar
+
 
 object DatabaseProxy {
 
-  val databaseUsername = "recharge"
-  val databasePassword = "recharge"
-  val databaseConnection = "jdbc:h2:h2/ReChargeWeb"
+  val h2DatabaseUsername = "recharge"
+  val h2DatabasePassword = "recharge"
+  val h2DatabaseConnection = "jdbc:h2:h2/ReChargeWeb"
 
 
-  def startDatabaseSession():Unit = {
+  def startH2DatabaseSession():Unit = {
     Class.forName("org.h2.Driver")
       SessionFactory.concreteFactory = Some(() => Session.create(
-          java.sql.DriverManager.getConnection(databaseConnection, databaseUsername, databasePassword),
+          java.sql.DriverManager.getConnection(h2DatabaseConnection, h2DatabaseUsername, h2DatabasePassword),
           new H2Adapter)
         )
   }
 
+
+
+  val mySqlDatabaseUsername = "ReCharge"
+  val mySqlDatabasePassword = "ReChargeHealth"
+  val mySqlDatabaseConnection = "jdbc:mysql://localhost:3306/ReCharge"
+
+  def startMySqlDatabaseSession():Unit = {
+    Class.forName("com.mysql.jdbc.Driver")
+      SessionFactory.concreteFactory = Some(() => Session.create(
+          java.sql.DriverManager.getConnection(mySqlDatabaseConnection, mySqlDatabaseUsername, mySqlDatabasePassword),
+          new MySQLAdapter)
+        )
+  }
+
+
+
   def generateSchema():Unit = {
     transaction {
-    ReChargeSchema.drop
-    ReChargeSchema.create
-    println("Created the schema")
+      ReChargeSchema.drop
+      ReChargeSchema.create
+      println("Created the schema")
+    }
+  }
+  def writeDdlToDisk() = {
+    transaction {
+      ReChargeSchema.printDdl
+      ReChargeSchema.printDdl(new PrintWriter(new FileWriter("/home/anna/ReChargeSchema.sql", true)))
+      println("Wrote schema to disk")
     }
   }
 
   def createTestData():Unit = {
     transaction {
-      val today: java.util.Date  = new java.util.Date();
-      val anna = new User(FirstName="Anna",
-                          LastName="Ayuso",
-                          Email="annaayuso@gmail.com",
-                          Password="pwd",
-                          RoleTypeID=1L,
-                          CreatedDate = new Date(today.getTime)
-                          )
-      ReChargeSchema.users.insert(anna)
+      val anna = User.createUser(firstName="Anna",
+                              lastName="Ayuso",
+                              email="annaayuso@gmail.com",
+                              password="pwd",
+                              roleTypeID=1L,
+                              createdDate = new java.sql.Date(Calendar.getInstance.getTime.getTime)
+                              )
+
+      val royce = User.createUser(firstName="Royce",
+                              lastName="Cheng",
+                              email="royce.cheng@gmail.com",
+                              password="pwd",
+                              roleTypeID=1L,
+                              createdDate = new java.sql.Date(Calendar.getInstance.getTime.getTime)
+                              )
 
       val task1 = new TaskDefinition(Name="CheckBloodPressure",
-                                     TaskTypeID=1,
+                                     TaskTypeID=TaskType.NumberEntry,
                                      Question="Check and report your blood presure.",
                                      Choices=None
                                     )
       ReChargeSchema.taskDefinitions.insert(task1)
 
       val task2 = new TaskDefinition(Name="TakeAmlodipine",
-                                     TaskTypeID=1,
+                                     TaskTypeID=TaskType.Statement,
                                      Question="Take 20mg of Amlodipine.  It is a blue, round pill",
                                      Choices=None
                                     )
       ReChargeSchema.taskDefinitions.insert(task2)
 
       val task3 = new TaskDefinition(Name="CheckWeight",
-                                     TaskTypeID=1,
+                                     TaskTypeID=TaskType.NumberEntry,
                                      Question="Check and report your weight.",
-                                     Choices=None
+                                     Choices=Some("Weight")
                                     )
       ReChargeSchema.taskDefinitions.insert(task3)
 
@@ -96,21 +129,21 @@ object DatabaseProxy {
                                                StartTime=None,
                                                RunIntervalInMinutes=None
                                               )
-      ReChargeSchema.userWorkflows.insert(userWorkflowAssoc)
+      ReChargeSchema.userWorkflowDefinitions.insert(userWorkflowAssoc)
+
+      val userWorkflowAssoc1 = new UserWorkflow(UserID=royce.id,
+                                               WorkflowDefinitionID=workflow.id,
+                                               StartTime=None,
+                                               RunIntervalInMinutes=None
+                                              )
+      ReChargeSchema.userWorkflowDefinitions.insert(userWorkflowAssoc1)
     }
   }
 
   def initializeDatabase = {
-      startDatabaseSession()
-      generateSchema()
-      createTestData()
+      startMySqlDatabaseSession()
+      //generateSchema()
+      //createTestData()
   }
 
-
-
-  def main(args: Array[String]) {
-      startDatabaseSession()
-      generateSchema()
-      createTestData()
-    }
 }

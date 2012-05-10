@@ -10,4 +10,7 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 
 #SignIn
-GET    /                   controllers.Application.signIn
+GET    /signIn                   controllers.Application.signIn
+
+#Complete Task
+POST    /completeTask/:id/complete       controllers.Application.completeTask(id: Long, userId : Long)
